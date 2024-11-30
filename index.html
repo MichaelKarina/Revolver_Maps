@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Textured Globe with Markers</title>
+    <title>Interactive Textured Globe with Auto-Rotation</title>
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
     <style>
         body, html { margin: 0; padding: 0; }
@@ -15,10 +15,44 @@
             border-radius: 50%;
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
         }
+        /* Zoom buttons styling */
+        .zoom-controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .zoom-btn {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 50%;
+            padding: 10px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            width: 30px;
+            height: 30px;
+        }
+        .zoom-btn:hover {
+            background-color: #f0f0f0;
+        }
+        /* Hide the Mapbox attribution and logo */
+        .mapboxgl-ctrl-logo, .mapboxgl-ctrl-attrib {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
     <div id="map"></div>
+
+    <!-- Zoom control buttons -->
+    <div class="zoom-controls">
+        <button class="zoom-btn" id="zoom-in">+</button>
+        <button class="zoom-btn" id="zoom-out">-</button>
+    </div>
+
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoiZ2l0aGVrbyIsImEiOiJjbTQydWNkencwNHhiMmpzNGl6cXZ6M2YwIn0.yn5MQqqN4uWGzPguN3j9hw';
@@ -30,7 +64,9 @@
             projection: 'globe', // Enable 3D globe projection
             center: [0, 20], // Initial center of the globe
             zoom: 1.5, // Initial zoom level
-            pitch: 0
+            pitch: 0,
+            interactive: true, // Ensure the globe remains interactive
+            attributionControl: false, // Hide the Mapbox logo and attribution text
         });
 
         // Add atmosphere for texture and water color
@@ -51,6 +87,10 @@
 
         // Add rotation animation to the globe (auto-rotation)
         let rotation = 0; // This will control the rotation of the globe
+        let isInteracting = false; // Flag to track if the user is interacting with the map
+        let rotationInterval; // To store the interval for rotation
+
+        // Function to rotate the globe
         function rotateGlobe() {
             rotation += 0.2; // Increment rotation by a small value for smooth rotation
             if (rotation >= 360) {
@@ -63,8 +103,9 @@
             });
         }
 
+        // Start auto-rotation when the map is loaded
         map.on('load', () => {
-            setInterval(rotateGlobe, 50); // Rotate every 50ms for smooth effect
+            rotationInterval = setInterval(rotateGlobe, 50); // Rotate every 50ms for smooth effect
 
             // Add DEM source for terrain
             map.addSource('mapbox-dem', {
@@ -73,6 +114,18 @@
                 tileSize: 512,
                 maxzoom: 14,
             });
+        });
+
+        // Detect user interaction
+        map.on('dragstart', () => {
+            isInteracting = true; // User is interacting with the map
+            clearInterval(rotationInterval); // Stop auto-rotation while interacting
+        });
+
+        map.on('dragend', () => {
+            isInteracting = false; // User stopped interacting
+            // Resume auto-rotation smoothly from the current state
+            rotationInterval = setInterval(rotateGlobe, 50); // Resume rotation after interaction
         });
 
         // Add red markers dynamically at specified locations
@@ -93,6 +146,18 @@
                 .setLngLat([location.lng, location.lat])
                 .setPopup(new mapboxgl.Popup().setText(location.name)) // Add popup with location name
                 .addTo(map);
+        });
+
+        // Zoom In Button
+        document.getElementById('zoom-in').addEventListener('click', () => {
+            const currentZoom = map.getZoom();
+            map.zoomTo(currentZoom + 1, { duration: 300 }); // Zoom in by 1 level
+        });
+
+        // Zoom Out Button
+        document.getElementById('zoom-out').addEventListener('click', () => {
+            const currentZoom = map.getZoom();
+            map.zoomTo(currentZoom - 1, { duration: 300 }); // Zoom out by 1 level
         });
     </script>
 </body>

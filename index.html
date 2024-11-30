@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Textured Globe with Markers</title>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+    <style>
+        body, html { margin: 0; padding: 0; }
+        #map { width: 100%; height: 100vh; }
+        .marker {
+            background-color: red;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiZ2l0aGVrbyIsImEiOiJjbTQydWNkencwNHhiMmpzNGl6cXZ6M2YwIn0.yn5MQqqN4uWGzPguN3j9hw';
+
+        // Initialize the Mapbox map with Globe view
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/satellite-streets-v12', // Use a satellite style for texture
+            projection: 'globe', // Enable 3D globe projection
+            center: [0, 20], // Initial center of the globe
+            zoom: 1.5, // Initial zoom level
+            pitch: 0
+        });
+
+        // Add atmosphere for texture and water color
+        map.on('style.load', () => {
+            map.setFog({
+                range: [1, 10], // Adjust fog range for depth effect
+                color: 'rgba(0, 0, 0, 0.5)', // Fog color for atmosphere
+                "high-color": "#add8e6", // Lighter blue for the sky (sky blue color)
+                "space-color": "#000000", // Space color (black)
+                "horizon-blend": 0.5, // Blend ratio
+            });
+
+            // Custom water color (sky blue)
+            map.setPaintProperty('water', 'fill-color', '#87CEEB'); // Sky blue water color
+
+            map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 }); // Add terrain (optional for elevation)
+        });
+
+        // Add rotation animation to the globe (auto-rotation)
+        let rotation = 0; // This will control the rotation of the globe
+        function rotateGlobe() {
+            rotation += 0.2; // Increment rotation by a small value for smooth rotation
+            if (rotation >= 360) {
+                rotation = 0; // Reset rotation after one full circle
+            }
+            map.easeTo({
+                center: [rotation, 20], // Change longitude to rotate the globe
+                duration: 0, // Instantaneous movement to the new center
+                easing: t => t // No easing, just smooth continuous movement
+            });
+        }
+
+        map.on('load', () => {
+            setInterval(rotateGlobe, 50); // Rotate every 50ms for smooth effect
+
+            // Add DEM source for terrain
+            map.addSource('mapbox-dem', {
+                type: 'raster-dem',
+                url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+                tileSize: 512,
+                maxzoom: 14,
+            });
+        });
+
+        // Add red markers dynamically at specified locations
+        const locations = [
+            { lng: -74.006, lat: 40.7128, name: "New York" }, // Example locations
+            { lng: 2.3522, lat: 48.8566, name: "Paris" },
+            { lng: 139.6917, lat: 35.6895, name: "Tokyo" },
+            { lng: 37.9062, lat: -1.2921, name: "Nairobi" }
+        ];
+
+        locations.forEach(location => {
+            // Create a marker element
+            const el = document.createElement('div');
+            el.className = 'marker';
+
+            // Add marker to map
+            new mapboxgl.Marker(el)
+                .setLngLat([location.lng, location.lat])
+                .setPopup(new mapboxgl.Popup().setText(location.name)) // Add popup with location name
+                .addTo(map);
+        });
+    </script>
+</body>
+</html>

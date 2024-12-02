@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Textured Globe with Auto-Rotation</title>
+    <title>RepntanceRevolverMaps</title>
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
     <style>
         body, html { margin: 0; padding: 0; }
@@ -128,14 +128,31 @@
             rotationInterval = setInterval(rotateGlobe, 50); // Resume rotation after interaction
         });
 
+
+
+
+
+        // MR. Caleb's part, input as much as you can, sai wacha niende job kiasi
+        https://web.postman.co/workspace/My-Workspace~d37a5040-2e73-401b-8770-07ee34d8c5eb/request/create?requestId=ec14b54a-0f40-44dd-8543-053f03bfad67
+        //this is the site, create an account
+        // https://api.geoapify.com/v1/geocode/search?text=Nanyuki&apiKey=67c0ef19b5504bb298b9fe738b06847b  apa unachange jina tu
         // Add red markers dynamically at specified locations
         const locations = [
             { lng: -74.006, lat: 40.7128, name: "New York" }, // Example locations
             { lng: 2.3522, lat: 48.8566, name: "Paris" },
             { lng: 139.6917, lat: 35.6895, name: "Tokyo" },
-            { lng: 37.9062, lat: -1.2921, name: "Nairobi" }
+            { lng: 37.9062, lat: -1.2921, name: "Nairobi" },
+            { lng: 39.667169,lat: -4.05052, name:"Mombasa"},
+            { lng: 34.7541761,lat: -0.1029109, name:"Kisumu"},
+            { lng: 37.1575858,lat: -0.7236564, name:"Murang'a"},
+            { lng: 37.1575858,lat: -0.7236564, name:"Murang'a"}
         ];
 
+
+
+
+
+        
         locations.forEach(location => {
             // Create a marker element
             const el = document.createElement('div');
